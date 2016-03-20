@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const fileSchema = mongoose.Schema({
-  // user: String,
+  bucketId: String,
   name: String,
   url: String
 });
