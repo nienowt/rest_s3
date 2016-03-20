@@ -2,7 +2,7 @@
 
 module.exports = (router) => {
 
-    router.route('/files/:file')
+  router.route('/files/:file')
     .get((req, res) => {
 
     })
@@ -12,4 +12,4 @@ module.exports = (router) => {
     .delete((req, res) => {
 
     });
-}
+};
