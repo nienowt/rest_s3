@@ -2,8 +2,9 @@
 
 const mongoose = require('mongoose');
 const fileSchema = mongoose.Schema({
-  name: String,
-  location: String
+  // user: String,
+  userId: String,
+  url: String
 });
 
 module.exports = mongoose.model('files', fileSchema);
