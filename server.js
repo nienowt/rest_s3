@@ -10,7 +10,7 @@ mongoose.connect('mongodb://localhost:db');
 require('./routes/file-routes')(router);
 require('./routes/trial-user-routes')(router);
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit:'10mb'}));
 
 app.use('/', router);
 app.listen(3000, () => {
