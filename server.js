@@ -8,7 +8,7 @@ let mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:db');
 
 require('./routes/file-routes')(router);
-require('./routes/trial-user-routes')(router);
+require('./routes/user-routes')(router);
 
 app.use(bodyParser.json({limit:'10mb'}));
 

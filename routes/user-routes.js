@@ -2,7 +2,6 @@
 
 module.exports = (router) => {
   let AWS = require('aws-sdk');
-  let fs = require('fs');
   AWS.config.region = 'us-west-2';
   let User = require(__dirname + '/../models/users-model');
   let File = require(__dirname + '/../models/files-model');
@@ -17,10 +16,11 @@ module.exports = (router) => {
       });
     })
     .post((req, res) => {
-      var newUser = new User(req.body);
-      newUser.save((err) => {
+      let newUser = new User(req.body);
+      newUser.save((err, user) => {
         if (err) res.send('User not saved');
         console.log('User saved!');
+        res.json(user);
         res.end();
       });
     });
@@ -42,7 +42,7 @@ module.exports = (router) => {
       });
     })
     .delete((req, res) => {
-      var s3 = new AWS.S3();
+      let s3 = new AWS.S3();
       User.findById(req.params.user, (err, user) => {
         if(user.files.length !== 0){
           user.files.forEach((file) => {
@@ -59,7 +59,7 @@ module.exports = (router) => {
         }
         s3.deleteBucket({Bucket: '401-' +req.params.user}, (err,data) => {
           if (err) console.log(err);
-          else console.log(data);
+          else console.log('delete data', data);
         });
         user.remove(() => {
           res.send('User Deleted');
@@ -78,34 +78,48 @@ module.exports = (router) => {
       });
     })
     .post((req, res) => {
-      var bucketName = req.params.user;
-      var s3 = new AWS.S3({params: {Bucket: '401-' + bucketName, Key: req.body.fileName}});
-      s3.createBucket(function(err) {
-        if (!err || err.code === 'BucketAlreadyOwnedByYou') {
-          s3.headObject((err, data) => {
-            if (err) console.log('this is the error',err);
-            if (!data){
-              s3.upload({Body: req.body.content}, (err, data) => {
-                if (err) console.log(err);
-                console.log('file uploaded');
-              });
-              s3.getSignedUrl('getObject',{Bucket: '401-' + bucketName, Key: req.body.fileName},(err, url) => {
-                if(err) console.log(err);
-                console.log(url)
-                var newFile = new File({bucketId: bucketName, name: req.body.fileName, url: url});
-                newFile.save((err, file) => {
-                  User.findByIdAndUpdate(bucketName, {$push: {'files': file._id}},{'new': true}, (err, user) => {
-                    if (err) console.log(err);
+      let fileName;
+      let fileContent;
+      if (req.headers['content-type'] === 'image/jpeg'){
+        let imgData = [];
+        req.on('data',(data) => {
+          imgData.push(data);
+        }).on('end', ()=>{
+          fileContent = Buffer.concat(imgData);
+          sendFiles();
+        });
+        fileName = req.headers['filename'];
+      } else {
+        fileName = req.body.fileName;
+        fileContent = req.body.content;
+        sendFiles();
+      }
+      function sendFiles(){
+        let bucketName = req.params.user;
+        let s3 = new AWS.S3({params: {Bucket: '401-' + bucketName, Key: fileName}});
+        s3.createBucket(function(err) {
+          if (!err || err.code === 'BucketAlreadyOwnedByYou') {
+            s3.headObject((err, data) => {
+              if (err) console.log('this is the error',err);
+              if (!data){
+                s3.upload({Body: fileContent, ACL: 'public-read'}, (err, data) => {
+                  if (err) console.log('here',err);
+                  res.write('file uploaded');
+                  res.end();
+                  let newFile = new File({bucketId: bucketName, name: fileName, url: data.Location});
+                  newFile.save((err, file) => {
+                    User.findByIdAndUpdate(bucketName, {$push: {'files': file._id}},{'new': true}, (err) => {
+                      if (err) console.log(err);
+                    });
                   });
                 });
-              })
-            }
-          });
-          res.end();
-        } else {
-          res.status(400).send('Error:'+ err);
-          res.end();
-        }
-      });
+              }
+            });
+          } else {
+            res.status(400).send('Error:'+ err);
+            res.end();
+          }
+        });
+      }
     });
 };
