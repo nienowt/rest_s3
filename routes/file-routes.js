@@ -2,7 +2,6 @@
 
 module.exports = (router) => {
   let File = require(__dirname + '/../models/files-model');
-  let User = require(__dirname + '/../models/users-model');
   let AWS = require('aws-sdk');
   AWS.config.region = 'us-west-2';
   let s3 = new AWS.S3();
@@ -18,7 +17,7 @@ module.exports = (router) => {
       File.findById(req.params.file, (err, file) => {
         s3.upload({Bucket: '401-' + file.bucketId, Key: file.name, Body: req.body.content}, (err, data) => {
           if (err) console.log(err);
-          console.log(data);
+          res.json(data);
         });
         res.end();
       });
