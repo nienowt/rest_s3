@@ -1,0 +1,36 @@
+{
+  "name": "rest-s3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.2.45",
+    "body-parser": "^1.15.0",
+    "mongoose": "^4.4.7",
+    "express": "^4.13.4"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^2.2.0",
+    "gulp-eslint": "^2.0.0",
+    "chai-http": "^2.0.1"  
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nienowt/rest_s3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nienowt/rest_s3/issues"
+  },
+  "homepage": "https://github.com/nienowt/rest_s3#readme"
+}
